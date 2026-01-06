@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/WebApplication">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>SVGConverter | Free JPG & PNG to SVG Vectorizer by Vikram Kumar Sinha</title>
+    <meta name="description" content="Convert raster images (JPG, PNG) to Scalable Vector Graphics (SVG) instantly in your browser. Free, privacy-focused, client-side vectorizer tool developed by Vikram Kumar Sinha.">
+    <meta name="keywords" content="image to svg, jpg to svg, png to svg, raster to vector, vectorizer, free svg converter, client-side svg tool, svgconverter">
+    <meta name="author" content="Vikram Kumar Sinha">
+    <meta name="robots" content="index, follow">
+
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234f46e5'/%3E%3Cpath d='M30 30 L50 80 L70 30' stroke='white' stroke-width='12' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='30' cy='30' r='6' fill='white'/%3E%3Ccircle cx='70' cy='30' r='6' fill='white'/%3E%3Ccircle cx='50' cy='80' r='6' fill='white'/%3E%3C/svg%3E">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://thevikramsinha.github.io/svgconverter/">
+    <meta property="og:title" content="SVGConverter | Free Image to Vector Tool">
+    <meta property="og:description" content="Turn your pixels into paths. Convert JPG and PNG images to editable SVG vectors instantly. No server uploads.">
+    <meta property="og:image" content="https://thevikramsinha.github.io/svgconverter/preview-card.png"> 
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SVGConverter | Free Image to Vector Tool">
+    <meta name="twitter:description" content="Convert JPG/PNG to SVG instantly. Privacy-focused & Free.">
+
+    <link rel="canonical" href="https://thevikramsinha.github.io/svgconverter/">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SVGConverter",
+      "url": "https://thevikramsinha.github.io/svgconverter/",
+      "operatingSystem": "Web Browser",
+      "applicationCategory": "DesignApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Vikram Kumar Sinha",
+        "url": "https://thevikramsinha.github.io/"
+      },
+      "description": "A browser-based tool to convert raster images into vector SVG files.",
+      "featureList": "Client-side processing, Privacy focused, Instant preview, SVG Code export"
+    }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer_v1.2.6.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+        
+        .brand { font-size: 1.5rem; font-weight: 800; color: var(--primary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .tagline { display: block; font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+        /* MAIN APP CONTAINER */
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .converter-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .converter-wrapper { grid-template-columns: 1fr; }
+            main { padding: 1rem; }
+        }
+
+        h1, h2, h3 { color: var(--text-main); margin-top: 0; }
+        
+        /* UI COMPONENTS */
+        .panel { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 0.75rem;
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fdfdfd;
+        }
+        .upload-area:hover { border-color: var(--primary); background: #f0fdf4; }
+        .upload-area strong { color: var(--primary); display: block; margin-bottom: 0.5rem; }
+        input[type="file"] { display: none; }
+
+        .preview-box {
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f1f5f9;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .preview-box img, .preview-box svg { max-width: 90%; max-height: 90%; object-fit: contain; }
+
+        textarea {
+            width: 100%; height: 120px; padding: 0.75rem;
+            border: 1px solid var(--border); border-radius: 0.5rem;
+            font-family: 'Courier New', monospace; font-size: 0.85rem;
+            resize: vertical; color: var(--text-muted);
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white; border: none; padding: 0.875rem 1.5rem;
+            border-radius: 0.5rem; font-weight: 600; cursor: pointer;
+            transition: background-color 0.2s; width: 100%; font-size: 1rem;
+        }
+        .btn:hover { background-color: var(--primary-hover); }
+        .btn:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+
+        .loader {
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary);
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* SEO CONTENT SECTION */
+        .seo-content {
+            max-width: 800px; margin: 0 auto; color: var(--text-main);
+        }
+        .seo-content h2 { font-size: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-top: 2rem; }
+        .seo-content p { color: var(--text-muted); font-size: 1.05rem; }
+        
+        /* FOOTER */
+        footer {
+            background: var(--surface); border-top: 1px solid var(--border);
+            padding: 2rem; text-align: center; margin-top: auto;
+            color: var(--text-muted); font-size: 0.9rem;
+        }
+        footer a { color: var(--primary); text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="#" class="brand">
+            <svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="20" fill="#4f46e5"/>
+                <path d="M30 30 L50 80 L70 30" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="30" cy="30" r="6" fill="white"/>
+                <circle cx="70" cy="30" r="6" fill="white"/>
+                <circle cx="50" cy="80" r="6" fill="white"/>
+            </svg>
+            SVGConverter
+        </a>
+        <span class="tagline">High-Fidelity Raster to Vector Engine</span>
+    </header>
+
+    <main>
+        <div class="converter-wrapper">
+            <div class="panel">
+                <h3>1. Upload Raster (JPG/PNG)</h3>
+                <label class="upload-area" for="fileInput">
+                    <strong>Click to Upload Image</strong>
+                    <span id="uploadText" style="color:var(--text-muted)">Supports JPG, PNG</span>
+                </label>
+                <input type="file" id="fileInput" accept="image/png, image/jpeg, image/jpg">
+                
+                <div class="preview-box">
+                    <img id="originalPreview" alt="Original Image Preview" style="display: none;">
+                    <span id="placeholderText" style="color:#94a3b8">Image Preview</span>
+                </div>
+                
+                <button id="convertBtn" class="btn" disabled>Convert to SVG Now</button>
+            </div>
+
+            <div class="panel">
+                <h3>2. Download Vector (SVG)</h3>
+                <div class="preview-box" id="svgContainer">
+                    <div class="loader" id="loader"></div>
+                    <span id="svgPlaceholder" style="color:#94a3b8">Vector Result</span>
+                </div>
+                
+                <textarea id="svgCodeOutput" placeholder="SVG Code will generate here..." readonly onclick="this.select()"></textarea>
+                <button id="downloadBtn" class="btn" disabled>Download .svg File</button>
+            </div>
+        </div>
+
+        <section class="seo-content">
+            <h1>Free Image to SVG Converter</h1>
+            <p>Welcome to <strong>SVGConverter</strong>, the free online tool that lets you convert raster images (JPG, PNG) into scalable vector graphics (SVG) directly in your browser. Developed by <strong>Vikram Kumar Sinha</strong>, this tool uses advanced client-side processing to ensure your data never leaves your device.</p>
+
+            <h2>Why Convert JPG to SVG?</h2>
+            <p>Scalable Vector Graphics (SVG) are essential for modern web design. Unlike raster images which get pixelated when zoomed in, SVGs are mathematical paths that remain crisp at any size. They are perfect for logos, icons, and illustrations.</p>
+
+            <h2>Key Features</h2>
+            <ul>
+                <li><strong>Privacy First:</strong> No server uploads. All conversion happens locally on your computer.</li>
+                <li><strong>Instant Vectorization:</strong> Uses the ImageTracer engine to trace paths in seconds.</li>
+                <li><strong>Full Control:</strong> Get the raw SVG code or download the file directly.</li>
+            </ul>
+
+            <h2>How to use SVGConverter</h2>
+            <ol>
+                <li>Upload your PNG or JPG file using the upload box.</li>
+                <li>Preview your original image.</li>
+                <li>Click the "Convert to SVG Now" button.</li>
+                <li>Copy the code or click "Download" to save your vector file.</li>
+            </ol>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; <script>document.write(new Date().getFullYear())</script> <strong>svgconverter</strong>. All rights reserved.</p>
+        <p>Designed & Developed by <a href="https://thevikramsinha.github.io/" target="_blank" rel="noopener">Vikram Kumar Sinha</a></p>
+    </footer>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadText = document.getElementById('uploadText');
+        const originalPreview = document.getElementById('originalPreview');
+        const placeholderText = document.getElementById('placeholderText');
+        const convertBtn = document.getElementById('convertBtn');
+        const svgContainer = document.getElementById('svgContainer');
+        const svgPlaceholder = document.getElementById('svgPlaceholder');
+        const svgCodeOutput = document.getElementById('svgCodeOutput');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const loader = document.getElementById('loader');
+
+        let uploadedFileData = null;
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            uploadText.textContent = `Selected: ${file.name}`;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                uploadedFileData = event.target.result;
+                originalPreview.src = uploadedFileData;
+                originalPreview.style.display = 'block';
+                placeholderText.style.display = 'none';
+                convertBtn.disabled = false;
+                convertBtn.innerText = "Convert to SVG Now";
+                
+                svgContainer.innerHTML = '';
+                svgContainer.appendChild(loader); 
+                svgContainer.appendChild(svgPlaceholder);
+                svgPlaceholder.style.display = 'block';
+                svgCodeOutput.value = '';
+                downloadBtn.disabled = true;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        convertBtn.addEventListener('click', function() {
+            if (!uploadedFileData) return;
+
+            loader.style.display = 'block';
+            svgPlaceholder.style.display = 'none';
+            svgContainer.querySelector('svg')?.remove();
+
+            const options = {
+                ltres: 1, qtres: 1, pathomit: 8, colorsampling: 2,
+                numberofcolors: 16, mincolorratio: 0.02, colorquantcycles: 3,
+                scale: 1, simplifytolerance: 0, roundcoords: 1, lcpr: 0,
+                qcpr: 0, desc: false, viewbox: true
+            };
+
+            setTimeout(() => {
+                ImageTracer.imageToSVG(
+                    uploadedFileData,
+                    function(svgString) {
+                        loader.style.display = 'none';
+                        svgContainer.innerHTML = svgString;
+                        svgCodeOutput.value = svgString;
+                        downloadBtn.disabled = false;
+                        convertBtn.innerText = "Converted Successfully!";
+                    },
+                    options
+                );
+            }, 100);
+        });
+
+        downloadBtn.addEventListener('click', function() {
+            const svgContent = svgCodeOutput.value;
+            if (!svgContent) return;
+            const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'svgconverter-output.svg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
