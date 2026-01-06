@@ -12,6 +12,7 @@
 
 **[👉 Launch SVGConverter](https://thevikramsinha.github.io/svgconverter/)**
 
+![DiffLens Interface Preview](https://thevikramsinha.github.io/svgconverter/preview-card.png)
 ---
 
 ## ✨ Key Features
